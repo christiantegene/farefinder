@@ -1,0 +1,65 @@
+volumes:
+  healthgpt-data:
+    external: true
+  pg-admin:
+    external: true
+
+services:
+  fastapi:
+    build:
+      context: sample_service
+      dockerfile: Dockerfile.dev
+    environment:
+      SIGNING_KEY: ${SIGNING_KEY}
+      NUTRITIONIX_URL: ${NUTRITIONIX_URL}
+      X_APP_ID: ${X_APP_ID}
+      X_APP_KEY: ${X_APP_KEY}
+      DATABASE_URL: postgresql://healthgpt:healthgpt@postgres/healthgpt
+      WAIT_HOSTS: postgres:5432
+    ports:
+      - 8000:8000
+    volumes:
+      - ./sample_service:/app
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: farefinder
+      POSTGRES_USER: farefinder
+      POSTGRES_DB: farefinder
+    ports:
+      - "15432:5432"
+    volumes:
+      - farefinder-data:/var/lib/postgresql/data
+
+  # pg-admin:
+  #   image: dpage/pgadmin4
+  #   volumes:
+  #       - pg-admin:/var/lib/pgadmin
+  #   ports:
+  #       - 8082:80
+  #   environment:
+  #       PGADMIN_DEFAULT_EMAIL: 5lackers.nb@gmail.com
+  #       PGADMIN_DEFAULT_PASSWORD: notbrad
+  #       PGADMIN_DISABLE_POSTFIX: 1
+
+  frontend:
+    image: node:lts-bullseye
+    command: /bin/bash run.sh
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3001:3001"
+    environment:
+      HOST_OS: ${OS}
+      NODE_ENV: development
+      HOST: "0.0.0.0"
+      PUBLIC_URL: ${PUBLIC_URL}
+      VITE_API_KEY: ${VITE_API_KEY}
+      VITE_AUTH_DOMAIN: ${VITE_AUTH_DOMAIN}
+      VITE_PROJECT_ID: ${VITE_PROJECT_ID}
+      VITE_STORAGE_BUCKET: ${VITE_STORAGE_BUCKET}
+      VITE_MESSAGING_SENDER_ID: ${VITE_MESSAGING_SENDER_ID}
+      VITE_APP_ID: ${VITE_APP_ID}
+      VITE_MEASUREMENT_ID: ${VITE_MEASUREMENT_ID}

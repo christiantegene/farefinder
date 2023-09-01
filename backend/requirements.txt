@@ -1,0 +1,5 @@
+fastapi[all]==0.92.0
+uvicorn[standard]==0.17.6
+pytest
+psycopg
+psycopg_pool
